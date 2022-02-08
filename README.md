@@ -1,1 +1,1 @@
-# Shrodinger-s_Qat
+# Shrodinger's_Qat
