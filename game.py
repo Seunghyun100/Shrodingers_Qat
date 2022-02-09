@@ -25,11 +25,8 @@ background_in_game = pygame.transform.scale(
 background_die = pygame.transform.scale(
     pygame.image.load("resource/background_images/Died_background.png"), (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-cat = pygame.transform.scale(
-    pygame.image.load("resource/cat_layers/cat_stand.png"), (CAT_WIDTH, CAT_HEIGHT))
-
-
-
+# cat = pygame.transform.scale(
+#     pygame.image.load("resource/cat_layers/cat_stand_left.png"), (CAT_WIDTH, CAT_HEIGHT))
 
 H = pygame.transform.scale(
     pygame.image.load("resource/gate/hgate.png"), (GATE_WIDTH, GATE_HEIGHT))
@@ -42,8 +39,51 @@ gates = {
     "H" : H, "X": X, "M": M
     }
 
+class Cat(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__()
+        self.attack_animation = False
+        self.key_left = True
+        self.sprites = []
+        self.sprites.append(pygame.transform.scale(pygame.image.load("resource/cat_layers/cat_walk_left.png"), (CAT_WIDTH, CAT_HEIGHT)))
+        self.sprites.append(pygame.transform.scale(pygame.image.load("resource/cat_layers/cat_stand_left.png"), (CAT_WIDTH, CAT_HEIGHT)))
+        self.sprites.append(pygame.transform.scale(pygame.image.load("resource/cat_layers/cat_walk_right.png"), (CAT_WIDTH, CAT_HEIGHT)))
+        self.sprites.append(pygame.transform.scale(pygame.image.load("resource/cat_layers/cat_stand_right.png"), (CAT_WIDTH, CAT_HEIGHT)))
+        # self.sprites.append(pygame.image.load('resource/cat_layers/cat_stand_left.png'))
+        # self.sprites.append(pygame.image.load('resource/cat_layers/cat_walk_right.png'))
+        # self.sprites.append(pygame.image.load('resource/cat_layers/cat_stand_right.png'))
+        self.current_sprite = 0
+        self.image = self.sprites[self.current_sprite]
 
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [pos_x, pos_y]
 
+    def attack(self, key_left):
+        self.attack_animation = True
+        self.key_left = key_left
+        if key_left == False:
+            self.current_sprite = 2
+
+    def keyup(self):
+        self.attack_animation = False
+
+    def update(self,speed):
+        if self.attack_animation == True:
+            if self.key_left == True:
+                self.current_sprite += speed
+                if int(self.current_sprite) >= len(self.sprites)/2:
+                    self.current_sprite = 0
+
+            if self.key_left == False:
+                self.current_sprite += speed
+                if int(self.current_sprite) >= len(self.sprites):
+                    self.current_sprite = 2
+
+        self.image = self.sprites[int(self.current_sprite)]
+
+moving_sprites = pygame.sprite.Group()
+cat = Cat(100,100)
+moving_sprites.add(cat)
 
 class Game:
 
@@ -55,22 +95,7 @@ class Game:
         self.is_alive = True
         self.game_font = pygame.font.Font(None,40)
     
-    def __prepare_game(self):
-        self.gate_string = ""
-        self.score = 0
-        self.start_time = time.time()
 
-        self.catXpos = (SCREEN_WIDTH / 2) - (CAT_WIDTH / 2)
-        self.catYpos = SCREEN_HEIGHT - CAT_HEIGHT
-        self.catSpeed = 1
-        self.catDirection = 0
-
-        self.gateXpos = random.randrange(0, int(SCREEN_WIDTH*(0.7933))-GATE_WIDTH) # 게이트 초기 x값
-        self.gateYpos = 0  
-        self.gate_speed = 7
-        self.gate_dspeed = 0.1
-        self.gate_speed_limit = 10
-        self.__new_gate()
     
     def show_title(self):
         self.screen.blit(background_title, (0,0))
@@ -90,7 +115,22 @@ class Game:
             pygame.display.update()
             self.clock.tick(FRAMES_PER_SECOND)
 
-        
+    def __prepare_game(self):
+        self.gate_string = ""
+        self.score = 0
+        self.start_time = time.time()
+
+        self.catXpos = (SCREEN_WIDTH / 2) - (CAT_WIDTH / 2)
+        self.catYpos = SCREEN_HEIGHT - CAT_HEIGHT
+        self.catSpeed = 1
+        self.catDirection = 0
+
+        self.gateXpos = random.randrange(0, int(SCREEN_WIDTH*(0.7933))-GATE_WIDTH) # 게이트 초기 x값
+        self.gateYpos = 0  
+        self.gate_speed = 7
+        self.gate_dspeed = 0.1
+        self.gate_speed_limit = 10
+        self.__new_gate()
     
     def play_game(self):
 
@@ -110,12 +150,15 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
                         self.catDirection = -1
+                        cat.attack(True)
                     if event.key == pygame.K_RIGHT:
                         self.catDirection = +1
+                        cat.attack(False)
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT: # 왼쪽 화살표 키
                         self.catDirection = 0
+                        cat.keyup()
             
             # cat's info update
             self.__cat_info_update()
@@ -142,7 +185,8 @@ class Game:
             self.__new_gate()
     
     def __check_collision(self):
-        catRect = cat.get_rect() # 캐릭터 판정 위치
+        # catRect = cat.get_rect() # 캐릭터 판정 위치
+        catRect = cat.rect
         catRect.left = self.catXpos
         catRect.top = self.catYpos
         
@@ -179,7 +223,9 @@ class Game:
 
         self.screen.fill((0,0,255)) # clear all
         self.screen.blit(background_in_game, (0,0))
-        self.screen.blit(cat, (self.catXpos , self.catYpos))
+        # self.screen.blit(cat, (self.catXpos , self.catYpos))
+        moving_sprites.draw(self.screen)
+        moving_sprites.update(0.25)
         self.screen.blit(self.gate, (self.gateXpos , self.gateYpos))
         self.screen.blit(time_text, (10,10))
         self.screen.blit(score_text, (10,30))
@@ -189,10 +235,11 @@ class Game:
 
 
     def game_over(self):
+
         bgm.stop()
         self.screen.blit(background_die, (0,0))
 
-        while True:
+        while self.is_running:
             for event in pygame.event.get():
 
                 if event.type == pygame.QUIT:

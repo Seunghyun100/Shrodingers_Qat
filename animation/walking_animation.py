@@ -16,7 +16,7 @@ class Player(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.topleft = [pos_x,pos_y]
 
-	def attack(self,key_left):
+	def attack(self, key_left):
 		self.attack_animation = True
 		self.key_left = key_left
 		if key_left == False:
