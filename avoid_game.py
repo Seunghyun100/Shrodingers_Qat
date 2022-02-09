@@ -87,7 +87,7 @@ while running:  #실행창
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT: # 왼쪽 화살표 키
                 toX = 0
             elif event.key == pygame.K_UP or event.key == pygame.K_DOWN: # 오른쪽 화살표 키
-                toY = 0 
+                toY = 0
     
     # 캐릭터 좌표를 업데이트
     characterXpos += toX * dt
@@ -115,7 +115,6 @@ while running:  #실행창
     enemyYpos += poSpeed
 
     # 충돌 판정
-    
     characterRect = character.get_rect() # 캐릭터 판정 위치
     characterRect.left = characterXpos
     characterRect.top = characterYpos
@@ -138,7 +137,8 @@ while running:  #실행창
     # 출력할 글자, 색상
     score_s = game_font.render("score : %s"%str(score), True, (255,255,255))
     
-    #screen.fill((0,0,255))
+    # 전체 그래픽 출력
+    screen.fill((0,0,255))
     screen.blit(background, (0,0)) 
     screen.blit(character, (characterXpos , characterYpos))
     screen.blit(enemy, (enemyXpos , enemyYpos))
