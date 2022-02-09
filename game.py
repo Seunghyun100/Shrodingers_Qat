@@ -123,7 +123,7 @@ class Game:
         self.catDirection = 0
 
         self.gateXpos = random.randrange(0, int(SCREEN_WIDTH*(0.7933))-GATE_WIDTH) # 게이트 초기 x값
-        self.gateYpos = 0  
+        self.gateYpos = 100
         self.gate_speed = 7
         self.gate_dspeed = 0.1
         self.gate_speed_limit = 10
@@ -206,7 +206,7 @@ class Game:
             
         # (새로운 게이트 위치 설정)
         self.gateXpos = random.randrange(0, int(SCREEN_WIDTH*0.7933)-GATE_WIDTH)
-        self.gateYpos = 0
+        self.gateYpos = 100
         
         # (게이트 점수 업데이트)
         self.score += 1
