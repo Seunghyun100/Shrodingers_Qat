@@ -2,6 +2,10 @@ from http.client import GATEWAY_TIMEOUT
 import pygame
 import random
 import time
+from qiskit import QuantumCircuit, Aer
+from qiskit.visualization import plot_bloch_multivector
+import os
+import matplotlib.pyplot as plt
 
 SCREEN_WIDTH = 1000 # 가로크기
 SCREEN_HEIGHT = 800 # 세로크기
@@ -11,6 +15,9 @@ CAT_HEIGHT = 150
 
 GATE_WIDTH = 150
 GATE_HEIGHT = 150
+
+STATE_WIDTH = 250
+STATE_HEIGHT = 250
 
 FRAMES_PER_SECOND = 60 # update display upto FRAMES_PER_SECOND times per a second
 
@@ -25,19 +32,32 @@ background_in_game = pygame.transform.scale(
 background_die = pygame.transform.scale(
     pygame.image.load("resource/background_images/Died_background.png"), (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-# cat = pygame.transform.scale(
-#     pygame.image.load("resource/cat_layers/cat_stand_left.png"), (CAT_WIDTH, CAT_HEIGHT))
+def create_gate(path):
+    return pygame.transform.scale(pygame.image.load(path), (GATE_WIDTH, GATE_HEIGHT))
 
-H = pygame.transform.scale(
-    pygame.image.load("resource/gate/hgate.png"), (GATE_WIDTH, GATE_HEIGHT))
-X = pygame.transform.scale(
-    pygame.image.load("resource/gate/xgate.png"), (GATE_WIDTH, GATE_HEIGHT))
-M = pygame.transform.scale(
-    pygame.image.load("resource/gate/measure.png"), (GATE_WIDTH, GATE_HEIGHT))
+X = create_gate("resource/gate/xgate.png")
+Y = create_gate("resource/gate/ygate.png")
+Z = create_gate("resource/gate/zgate.png")
+H = create_gate("resource/gate/hgate.png")
+S = create_gate("resource/gate/sgate.png")
+S_dagger = create_gate("resource/gate/sdgate.png")
+T = create_gate("resource/gate/tgate.png")
+T_dagger = create_gate("resource/gate/tdgate.png")
+M = create_gate("resource/gate/measure.png")
 
 gates = {
-    "H" : H, "X": X, "M": M
+    "X": X,
+    "Y": Y,
+    "Z": Z,
+    "H": H,
+    "S": S,
+    "S+": S_dagger,
+    "T": T,
+    "T+": T_dagger,
+    "M": M
     }
+
+sim = Aer.get_backend("aer_simulator")
 
 class Cat(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
@@ -92,8 +112,6 @@ class Game:
         self.is_alive = True
         self.game_font = pygame.font.Font(None,40)
     
-
-    
     def show_title(self):
         self.screen.blit(background_title, (0,0))
 
@@ -128,7 +146,12 @@ class Game:
         self.gate_dspeed = 0.1
         self.gate_speed_limit = 10
         self.__new_gate()
-    
+
+        self.qc = QuantumCircuit(1)
+        self.qc.h(0)
+        self.__new_state()
+
+
     def play_game(self):
 
         self.screen.blit(background_in_game, (0,0))
@@ -182,8 +205,7 @@ class Game:
             self.__new_gate()
     
     def __check_collision(self):
-        # catRect = cat.get_rect() # 캐릭터 판정 위치
-        catRect = cat.rect
+        catRect = cat.rect # 캐릭터 판정 위치
         catRect.left = self.catXpos
         catRect.top = self.catYpos
         
@@ -193,12 +215,14 @@ class Game:
 
         if catRect.colliderect(gateRect): # 충돌이 일어났다면
         
-            if self.gate_kind == "M":     
+            if self.gate_kind == "M":
+                # <- measure by current state
                 self.is_alive = False
             
             else:                    
                 self.gate_string = self.gate_string + " " + self.gate_kind
                 self.__new_gate()
+                self.__new_state() # update bloch sphere picture
 
     def __new_gate(self):
         # (다음번 떨어질 게이트 정하기)
@@ -212,6 +236,24 @@ class Game:
         self.score += 1
         if self.gate_speed < self.gate_speed_limit:
             self.gate_speed += self.gate_dspeed
+    
+    def __new_state(self):
+
+        # <- gate update on self.qc
+
+        qc_init = self.qc.copy()
+        qc_init.save_statevector()
+        statevector = sim.run(qc_init).result().get_statevector()
+
+        try:
+            self.state = pygame.transform.scale(pygame.image.load(f"./temp/{statevector}.png"), (STATE_WIDTH, STATE_HEIGHT))
+        except:
+            plot_bloch_multivector(statevector)
+            plt.savefig(f"./temp/{statevector}.png")
+            plt.cla()
+            self.state = pygame.transform.scale(pygame.image.load(f"./temp/{statevector}.png"), (STATE_WIDTH, STATE_HEIGHT))
+            os.remove(f"./temp/{statevector}.png")
+
     
     def __graphic_update(self):
         time_text = self.game_font.render(f"time : {str(int(time.time() - self.start_time))} sec", True, (0,0,0)) #타이머 표시
@@ -227,8 +269,10 @@ class Game:
         self.screen.blit(time_text, (10,10))
         self.screen.blit(score_text, (10,30))
         self.screen.blit(eat_gate_text, (10, 50))
+        self.screen.blit(self.state, (750,0))
         
         pygame.display.update()
+
 
 
     def game_over(self):
