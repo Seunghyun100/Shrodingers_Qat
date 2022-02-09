@@ -8,7 +8,7 @@ import os
 sim = Aer.get_backend('aer_simulator')
 
 def load_bloch_sphere(eat_gate: list):
-    # gate kind: 'M', 'X', 'Y', 'Z', 'H', 'S', 'T', 'S_dagger', 'T_dagger'
+    # gate kind: 'M', 'X', 'Y', 'Z', 'H', 'S', 'T', 'S+', 'T+'
 
     qc = QuantumCircuit(1,1)    
     for gate in eat_gate:
