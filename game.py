@@ -241,6 +241,9 @@ class Game:
 
         # <- gate update on self.qc
 
+        if not os.path.exists("./temp"):
+            os.mkdir("./temp")
+
         qc_init = self.qc.copy()
         qc_init.save_statevector()
         statevector = sim.run(qc_init).result().get_statevector()
@@ -252,7 +255,7 @@ class Game:
             plt.savefig(f"./temp/{statevector}.png")
             plt.cla()
             self.state = pygame.transform.scale(pygame.image.load(f"./temp/{statevector}.png"), (STATE_WIDTH, STATE_HEIGHT))
-            os.remove(f"./temp/{statevector}.png")
+            # os.remove(f"./temp/{statevector}.png")
 
     
     def __graphic_update(self):
