@@ -49,9 +49,6 @@ class Cat(pygame.sprite.Sprite):
         self.sprites.append(pygame.transform.scale(pygame.image.load("resource/cat_layers/cat_stand_left.png"), (CAT_WIDTH, CAT_HEIGHT)))
         self.sprites.append(pygame.transform.scale(pygame.image.load("resource/cat_layers/cat_walk_right.png"), (CAT_WIDTH, CAT_HEIGHT)))
         self.sprites.append(pygame.transform.scale(pygame.image.load("resource/cat_layers/cat_stand_right.png"), (CAT_WIDTH, CAT_HEIGHT)))
-        # self.sprites.append(pygame.image.load('resource/cat_layers/cat_stand_left.png'))
-        # self.sprites.append(pygame.image.load('resource/cat_layers/cat_walk_right.png'))
-        # self.sprites.append(pygame.image.load('resource/cat_layers/cat_stand_right.png'))
         self.current_sprite = 0
         self.image = self.sprites[self.current_sprite]
 
