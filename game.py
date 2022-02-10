@@ -12,8 +12,8 @@ from animation.cat import Cat
 SCREEN_WIDTH = 1000 # 가로크기
 SCREEN_HEIGHT = 800 # 세로크기
 
-GATE_WIDTH = 120
-GATE_HEIGHT = 120
+GATE_WIDTH = 50
+GATE_HEIGHT = 50
 
 CAT_WIDTH = 120
 CAT_HEIGHT = 120
@@ -230,6 +230,10 @@ class Game:
                 self.gate_string = self.gate_string + " " + self.gate1_kind
                 self.__new_gate(1)
                 self.__update_state(1) # update bloch sphere picture
+                
+                # <- if self.state_kind == self.target_state_kind
+                # score up
+                # new_target_State
 
         if catRect.colliderect(gateRect2): # 충돌이 일어났다면
         
@@ -304,6 +308,9 @@ class Game:
         qc_init.save_statevector()
         statevector = sim.run(qc_init).result().get_statevector()
 
+        # <- if statevector = []
+        # self.state_kind
+
         try:
             self.state = pygame.transform.scale(pygame.image.load(f"./temp/{statevector}.png"), (STATE_WIDTH, STATE_HEIGHT))
         except:
@@ -311,10 +318,9 @@ class Game:
             plt.savefig(f"./temp/{statevector}.png")
             plt.cla()
             self.state = pygame.transform.scale(pygame.image.load(f"./temp/{statevector}.png"), (STATE_WIDTH, STATE_HEIGHT))
-            # os.remove(f"./temp/{statevector}.png")
 
     def __new_target_state(self):
-        _, self.target_state = random.choice(list(all_target_states.items()))
+        self.target_state_kind, self.target_state = random.choice(list(all_target_states.items()))
     
     def __graphic_update(self):
         time_text = self.game_font.render(f"time : {str(int(time.time() - self.start_time))} sec", True, (0,0,0)) #타이머 표시
