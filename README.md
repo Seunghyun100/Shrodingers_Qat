@@ -15,7 +15,14 @@ This project is an avoid game like "SUBERUNKER". If you use a rotation operation
 @tkekfl
 
 # Deliverable
-computer app
+Computer app using Python
+## Libraries used for this app
+- pygame
+- numpy
+- matplotlib
+- qiskit
+- qiskit.visualization
 
-# Future work
-- [ ] function for target state
+
+# Future work (not implemented yet)
+- [ ] target state misson

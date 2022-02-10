@@ -1,13 +1,11 @@
-from xmlrpc.client import Boolean
 import pygame
 import random
 import time
+import os
+import numpy as np
+import matplotlib.pyplot as plt
 from qiskit import QuantumCircuit, Aer
 from qiskit.visualization import plot_bloch_multivector
-import os
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy import rand
 
 from animation.cat import Cat
 
