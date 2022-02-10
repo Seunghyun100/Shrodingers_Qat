@@ -16,3 +16,6 @@ This project is an avoid game like "SUBERUNKER". If you use a rotation operation
 
 # Deliverable
 computer app
+
+# Future work
+- [ ] function for target state
