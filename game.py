@@ -1,3 +1,4 @@
+from xmlrpc.client import Boolean
 import pygame
 import random
 import time
@@ -6,6 +7,7 @@ from qiskit.visualization import plot_bloch_multivector
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import rand
 
 from animation.cat import Cat
 
@@ -96,7 +98,7 @@ class Game:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
         self.is_running = True
-        self.is_alive = True
+        self.is_gaming = True
         self.game_font = pygame.font.Font(None,40)
         self.key_left = False
     
@@ -118,10 +120,11 @@ class Game:
             pygame.display.update()
             self.clock.tick(FRAMES_PER_SECOND)
 
-    def __prepare_game(self):
+    def __prepare_game(self, dead=True):
         self.gate_string = ""
-        self.score = 0
-        self.start_time = time.time()
+        if dead:
+            self.score = 0
+            self.start_time = time.time()
 
         self.catXpos = (SCREEN_WIDTH / 2) - (CAT_WIDTH / 2)
         self.catYpos = SCREEN_HEIGHT - CAT_HEIGHT
@@ -150,10 +153,9 @@ class Game:
 
         self.screen.blit(background_in_game, (0,0))
         bgm.play(-1)
-        self.start_time = time.time()
-        self.is_alive = True
+        self.is_gaming = True
 
-        while self.is_alive:
+        while self.is_gaming:
 
             for event in pygame.event.get():
 
@@ -223,8 +225,8 @@ class Game:
         if catRect.colliderect(gateRect1): # 충돌이 일어났다면
         
             if self.gate1_kind == "M":
-                # <- measure by current state
-                self.is_alive = False
+                self.is_gaming = False
+                self.__new_gate(1)
             
             else:                    
                 self.gate_string = self.gate_string + " " + self.gate1_kind
@@ -233,18 +235,19 @@ class Game:
                 
                 # <- if self.state_kind == self.target_state_kind
                 # score up
-                # new_target_State
+                # make new_target_state
 
         if catRect.colliderect(gateRect2): # 충돌이 일어났다면
         
             if self.gate2_kind == "M":
-                # <- measure by current state
-                self.is_alive = False
+                self.is_gaming = False
+                self.__new_gate(2)
             
             else:                    
                 self.gate_string = self.gate_string + " " + self.gate2_kind
                 self.__new_gate(2)
                 self.__update_state(2) # update bloch sphere picture
+
 
     def __new_gate(self, gate_num):
         
@@ -308,20 +311,7 @@ class Game:
         qc_init.save_statevector()
         statevector = sim.run(qc_init).result().get_statevector()
 
-        # coef0, coef1 = statevector.data
-        # theta = np.round(np.arccos(coef0),3)
-        # phi = np.round(np.angle(coef1),3)
-
-        # if np.absolute(coef0) == np.absolute(coef1):
-        #     print("plate:", phi/(np.pi/4))
-        
-        # elif np.absolute(coef0) > np.absolute(coef1):
-        #     print("+:", phi/(np.pi/4))
-        
-        # else:
-        #     print("-:", phi/(np.pi/4))
-
-        # self.state_kind
+        self.live_prob = np.absolute(statevector[0])**2
 
         try:
             self.state = pygame.transform.scale(pygame.image.load(f"./temp/{statevector}.png"), (STATE_WIDTH, STATE_HEIGHT))
@@ -353,13 +343,19 @@ class Game:
         
         pygame.display.update()
 
-
-
-    def game_over(self):
+    def measure(self):
 
         bgm.stop()
         self.screen.blit(background_die, (0,0))
 
+        measure_pic = []
+
+        measure_pic.append(pygame.transform.scale(pygame.image.load("resource/cat_measure/measure_live.png"), (SCREEN_WIDTH, SCREEN_HEIGHT)))
+        measure_pic.append(pygame.transform.scale(pygame.image.load("resource/cat_measure/measure_die.png"), (SCREEN_WIDTH, SCREEN_HEIGHT)))
+        alive = pygame.transform.scale(pygame.image.load("resource/cat_measure/alive.png"), (SCREEN_WIDTH, SCREEN_HEIGHT))
+        dead = pygame.transform.scale(pygame.image.load("resource/cat_measure/dead.png"), (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+        is_while_break = False
         while self.is_running:
             for event in pygame.event.get():
 
@@ -368,12 +364,32 @@ class Game:
                     return
 
                 if event.type == pygame.KEYDOWN:
-                    self.__prepare_game()
-                    return
+                    is_while_break = True
             
+            if is_while_break:
+                break
+
+            self.screen.blit(measure_pic[random.randint(0,1)], (0,0))
             pygame.display.update()
             self.clock.tick(FRAMES_PER_SECOND)
+        
+        judge = random.random()
+        if self.live_prob >= judge:
+            self.screen.blit(alive, (0,0))
+            pygame.display.update()
+            time.sleep(1)
+            self.__prepare_game(dead=False)
+        else:
+            self.screen.blit(dead, (0,0))
+            pygame.display.update()
+            time.sleep(1)
+            self.__prepare_game(dead=True)
+        
+    
 
+
+        
+        
 
 
 def main():
@@ -381,7 +397,7 @@ def main():
     g.show_title()
     while g.is_running:
         g.play_game()
-        g.game_over()
+        g.measure()
     pygame.quit()
 
 
