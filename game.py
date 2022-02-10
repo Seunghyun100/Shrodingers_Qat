@@ -313,13 +313,13 @@ class Game:
 
         self.live_prob = np.absolute(statevector[0])**2
 
-        try:
-            self.state = pygame.transform.scale(pygame.image.load("./temp/%s.png" % statevector), (STATE_WIDTH, STATE_HEIGHT))
-        except:
-            plot_bloch_multivector(statevector)
-            plt.savefig("./temp/%s.png" % statevector)
-            plt.cla()
-            self.state = pygame.transform.scale(pygame.image.load("./temp/%s.png" % statevector), (STATE_WIDTH, STATE_HEIGHT))
+        # try:
+        #     self.state = pygame.transform.scale(pygame.image.load("./temp/statevector.png"), (STATE_WIDTH, STATE_HEIGHT))
+        # except:
+        plot_bloch_multivector(statevector)
+        plt.savefig("./temp/statevector.png")
+        plt.cla()
+        self.state = pygame.transform.scale(pygame.image.load("./temp/statevector.png"), (STATE_WIDTH, STATE_HEIGHT))
 
     def __new_target_state(self):
         self.target_state_kind, self.target_state = random.choice(list(all_target_states.items()))
