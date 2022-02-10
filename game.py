@@ -275,6 +275,11 @@ class Game:
 
 
     def __new_gate(self, gate_num):
+
+        """
+        gate limitation is need for closed operation
+        """
+
         
         if gate_num == 1:
             # self.gate1_kind, self.gate1 = random.choice(list(all_gates.items())) # (다음번 떨어질 게이트 정하기)
