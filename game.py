@@ -141,7 +141,7 @@ class Game:
 
         self.qc = QuantumCircuit(1)
         self.qc.h(0)
-        self.__new_state()
+        self.__update_state()
         
         self.__new_target_state() # self.target_state is determined here
 
@@ -229,7 +229,7 @@ class Game:
             else:                    
                 self.gate_string = self.gate_string + " " + self.gate1_kind
                 self.__new_gate(1)
-                self.__new_state(1) # update bloch sphere picture
+                self.__update_state(1) # update bloch sphere picture
 
         if catRect.colliderect(gateRect2): # 충돌이 일어났다면
         
@@ -240,7 +240,7 @@ class Game:
             else:                    
                 self.gate_string = self.gate_string + " " + self.gate2_kind
                 self.__new_gate(2)
-                self.__new_state(2) # update bloch sphere picture
+                self.__update_state(2) # update bloch sphere picture
 
     def __new_gate(self, gate_num):
         
@@ -259,9 +259,7 @@ class Game:
         if self.gate_speed < self.gate_speed_limit:
             self.gate_speed += self.gate_dspeed
     
-    def __new_state(self, gate_num=None):
-
-        # <- gate update on self.qc by self.gate_string
+    def __update_state(self, gate_num=None):
 
         if gate_num == 1:
             if self.gate1_kind == "X":
