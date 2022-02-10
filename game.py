@@ -12,14 +12,14 @@ from animation.cat import Cat
 SCREEN_WIDTH = 1000 # 가로크기
 SCREEN_HEIGHT = 800 # 세로크기
 
-GATE_WIDTH = 150
-GATE_HEIGHT = 150
+GATE_WIDTH = 120
+GATE_HEIGHT = 120
 
-CAT_WIDTH = 150
-CAT_HEIGHT = 150
+CAT_WIDTH = 120
+CAT_HEIGHT = 120
 
-STATE_WIDTH = 250
-STATE_HEIGHT = 250
+STATE_WIDTH = 240
+STATE_HEIGHT = 240
 
 FRAMES_PER_SECOND = 60 # update display upto FRAMES_PER_SECOND times per a second
 
@@ -47,7 +47,7 @@ T = create_gate("resource/gate/tgate.png")
 T_dagger = create_gate("resource/gate/tdgate.png")
 M = create_gate("resource/gate/measure.png")
 
-gates = {
+all_gates = {
     "X": X,
     "Y": Y,
     "Z": Z,
@@ -60,7 +60,6 @@ gates = {
     }
 
 sim = Aer.get_backend("aer_simulator")
-
 
 moving_sprites = pygame.sprite.Group()
 cat = Cat(0, 0, CAT_WIDTH, CAT_HEIGHT)
@@ -104,12 +103,16 @@ class Game:
         self.catSpeed = 1
         self.catDirection = 0
 
-        self.gateXpos = random.randrange(0, int(SCREEN_WIDTH*(0.7933))-GATE_WIDTH) # 게이트 초기 x값
-        self.gateYpos = 100
+        self.gate1Xpos = random.randrange(0, int(SCREEN_WIDTH*(0.7933))-GATE_WIDTH) # 게이트 초기 x값
+        self.gate1Ypos = 100
+        self.gate2Xpos = random.randrange(0, int(SCREEN_WIDTH*(0.7933))-GATE_WIDTH) # 게이트 초기 x값
+        self.gate2Ypos = 100
+
         self.gate_speed = 7
         self.gate_dspeed = 0.1
         self.gate_speed_limit = 10
-        self.__new_gate()
+        self.__new_gate(1) # self.gate1, self.gate1_kind is determined here
+        self.__new_gate(2)
 
         self.qc = QuantumCircuit(1)
         self.qc.h(0)
@@ -164,37 +167,60 @@ class Game:
             self.catXpos = int(SCREEN_WIDTH*(0.7933)) - CAT_WIDTH  
 
     def __gate_info_update(self):
-        self.gateYpos += self.gate_speed
-        if self.gateYpos > SCREEN_HEIGHT - GATE_HEIGHT: # 게이트가 화면 밖으로 빠져나가지 않게 조정
-            self.__new_gate()
+        self.gate1Ypos += self.gate_speed
+        self.gate2Ypos += self.gate_speed
+        if self.gate1Ypos > SCREEN_HEIGHT - GATE_HEIGHT: # 게이트가 화면 밖으로 빠져나가지 않게 조정
+            self.__new_gate(1)
+        if self.gate2Ypos > SCREEN_HEIGHT - GATE_HEIGHT: # 게이트가 화면 밖으로 빠져나가지 않게 조정
+            self.__new_gate(2)
+        
     
     def __check_collision(self):
         catRect = cat.rect # 캐릭터 판정 위치
         catRect.left = self.catXpos
         catRect.top = self.catYpos
         
-        gateRect = self.gate.get_rect() # 게이트 판정 위치
-        gateRect.left = self.gateXpos
-        gateRect.top = self.gateYpos
+        gateRect1 = self.gate1.get_rect() # 게이트 판정 위치
+        gateRect1.left = self.gate1Xpos
+        gateRect1.top = self.gate1Ypos
 
-        if catRect.colliderect(gateRect): # 충돌이 일어났다면
+        gateRect2 = self.gate2.get_rect() # 게이트 판정 위치
+        gateRect2.left = self.gate2Xpos
+        gateRect2.top = self.gate2Ypos
+
+        if catRect.colliderect(gateRect1): # 충돌이 일어났다면
         
-            if self.gate_kind == "M":
+            if self.gate1_kind == "M":
                 # <- measure by current state
                 self.is_alive = False
             
             else:                    
-                self.gate_string = self.gate_string + " " + self.gate_kind
-                self.__new_gate()
+                self.gate_string = self.gate_string + " " + self.gate1_kind
+                self.__new_gate(1)
                 self.__new_state() # update bloch sphere picture
 
-    def __new_gate(self):
-        # (다음번 떨어질 게이트 정하기)
-        self.gate_kind, self.gate = random.choice(list(gates.items()))
+        if catRect.colliderect(gateRect2): # 충돌이 일어났다면
+        
+            if self.gate2_kind == "M":
+                # <- measure by current state
+                self.is_alive = False
             
-        # (새로운 게이트 위치 설정)
-        self.gateXpos = random.randrange(0, int(SCREEN_WIDTH*0.7933)-GATE_WIDTH)
-        self.gateYpos = 100
+            else:                    
+                self.gate_string = self.gate_string + " " + self.gate2_kind
+                self.__new_gate(2)
+                self.__new_state() # update bloch sphere picture
+
+    def __new_gate(self, gate_num):
+        
+        if gate_num == 1:
+            self.gate1_kind, self.gate1 = random.choice(list(all_gates.items())) # (다음번 떨어질 게이트 정하기)
+            self.gate1Xpos = random.randrange(0, int(SCREEN_WIDTH*0.7933)-GATE_WIDTH) # (새로운 게이트 위치 설정)
+            self.gate1Ypos = 100
+
+        if gate_num == 2:
+            self.gate2_kind, self.gate2 = random.choice(list(all_gates.items()))
+            self.gate2Xpos = random.randrange(0, int(SCREEN_WIDTH*0.7933)-GATE_WIDTH)
+            self.gate2Ypos = 100
         
         # (게이트 점수 업데이트)
         self.score += 1
@@ -232,7 +258,8 @@ class Game:
         # self.screen.blit(cat, (self.catXpos , self.catYpos))
         moving_sprites.draw(self.screen)
         moving_sprites.update(0.25)
-        self.screen.blit(self.gate, (self.gateXpos , self.gateYpos))
+        self.screen.blit(self.gate1, (self.gate1Xpos , self.gate1Ypos))
+        self.screen.blit(self.gate2, (self.gate2Xpos , self.gate2Ypos))
         self.screen.blit(time_text, (10,10))
         self.screen.blit(score_text, (10,30))
         self.screen.blit(eat_gate_text, (10, 50))
