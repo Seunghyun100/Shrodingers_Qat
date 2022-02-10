@@ -230,8 +230,8 @@ class Game:
             
             else:                    
                 self.gate_string = self.gate_string + " " + self.gate1_kind
-                self.__new_gate(1)
                 self.__update_state(1) # update bloch sphere picture
+                self.__new_gate(1)
                 
                 # <- if self.state_kind == self.target_state_kind
                 # score up
@@ -245,8 +245,8 @@ class Game:
             
             else:                    
                 self.gate_string = self.gate_string + " " + self.gate2_kind
-                self.__new_gate(2)
                 self.__update_state(2) # update bloch sphere picture
+                self.__new_gate(2)
 
 
     def __new_gate(self, gate_num):
@@ -304,18 +304,18 @@ class Game:
             if self.gate2_kind == "T+":
                 self.qc.tdg(0)
 
-        if not os.path.exists("./temp"):
-            os.mkdir("./temp")
-
+        # print(self.gate_string)
+        # print(self.qc)
+        # print(self.gate1_kind, self.gate2_kind)
         qc_init = self.qc.copy()
         qc_init.save_statevector()
         statevector = sim.run(qc_init).result().get_statevector()
 
         self.live_prob = np.absolute(statevector[0])**2
 
-        # try:
-        #     self.state = pygame.transform.scale(pygame.image.load("./temp/statevector.png"), (STATE_WIDTH, STATE_HEIGHT))
-        # except:
+        if not os.path.exists("./temp"):
+            os.mkdir("./temp")
+
         plot_bloch_multivector(statevector)
         plt.savefig("./temp/statevector.png")
         plt.cla()
