@@ -50,7 +50,7 @@ S = load_image_from("resource/gate/sgate.png", GATE_WIDTH, GATE_HEIGHT)
 S_dagger = load_image_from("resource/gate/sdgate.png", GATE_WIDTH, GATE_HEIGHT)
 T = load_image_from("resource/gate/tgate.png", GATE_WIDTH, GATE_HEIGHT)
 T_dagger = load_image_from("resource/gate/tdgate.png", GATE_WIDTH, GATE_HEIGHT)
-M = load_image_from("resource/gate/measure.png", GATE_WIDTH, GATE_HEIGHT)
+M = load_image_from("resource/gate/measure.png", GATE_WIDTH*2, GATE_HEIGHT*2)
 
 all_gates = {
     "X": X,
@@ -66,26 +66,26 @@ all_gates = {
 
 gate_weight = "X Y Z H S S+ T T+ M M M M M".split()
 
-all_target_states = {
-    "0": load_image_from("resource/target_state/0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "1": load_image_from("resource/target_state/1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x-0": load_image_from("resource/target_state/x-0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x-1": load_image_from("resource/target_state/x-1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x-2": load_image_from("resource/target_state/x-2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x-3": load_image_from("resource/target_state/x-3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x+0": load_image_from("resource/target_state/x+0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x+1": load_image_from("resource/target_state/x+1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x+2": load_image_from("resource/target_state/x+2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x+3": load_image_from("resource/target_state/x+3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x0": load_image_from("resource/target_state/x0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x1": load_image_from("resource/target_state/x1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x2": load_image_from("resource/target_state/x2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x3": load_image_from("resource/target_state/x3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x4": load_image_from("resource/target_state/x4.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x5": load_image_from("resource/target_state/x5.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x6": load_image_from("resource/target_state/x6.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-    "x7": load_image_from("resource/target_state/x7.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-}
+# all_target_states = {
+#     "0": load_image_from("resource/target_state/0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "1": load_image_from("resource/target_state/1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x-0": load_image_from("resource/target_state/x-0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x-1": load_image_from("resource/target_state/x-1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x-2": load_image_from("resource/target_state/x-2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x-3": load_image_from("resource/target_state/x-3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x+0": load_image_from("resource/target_state/x+0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x+1": load_image_from("resource/target_state/x+1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x+2": load_image_from("resource/target_state/x+2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x+3": load_image_from("resource/target_state/x+3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x0": load_image_from("resource/target_state/x0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x1": load_image_from("resource/target_state/x1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x2": load_image_from("resource/target_state/x2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x3": load_image_from("resource/target_state/x3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x4": load_image_from("resource/target_state/x4.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x5": load_image_from("resource/target_state/x5.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x6": load_image_from("resource/target_state/x6.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+#     "x7": load_image_from("resource/target_state/x7.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+# }
 
 sim = Aer.get_backend("aer_simulator")
 
@@ -134,21 +134,24 @@ class Game:
         self.catDirection = 0
 
         self.gate1Xpos = random.randrange(0, int(SCREEN_WIDTH*(0.7933))-GATE_WIDTH) # 게이트 초기 x값
-        self.gate1Ypos = 100
+        self.gate1Ypos = 100 - random.random() * 50
         self.gate2Xpos = random.randrange(0, int(SCREEN_WIDTH*(0.7933))-GATE_WIDTH) # 게이트 초기 x값
-        self.gate2Ypos = 100
+        self.gate2Ypos = 100 - random.random() * 50
+        self.gate3Xpos = random.randrange(0, int(SCREEN_WIDTH*(0.7933))-GATE_WIDTH) # 게이트 초기 x값
+        self.gate3Ypos = 100 - random.random() * 50
 
         self.gate_speed = 7
         self.gate_dspeed = 0.1
         self.gate_speed_limit = 10
         self.__new_gate(1) # self.gate1, self.gate1_kind is determined here
         self.__new_gate(2)
+        self.__new_gate(3)
 
         self.qc = QuantumCircuit(1)
         self.qc.h(0)
         self.__update_state()
         
-        self.__new_target_state() # self.target_state is determined here
+        # self.__new_target_state() # self.target_state is determined here
 
 
     def play_game(self):
@@ -206,10 +209,13 @@ class Game:
     def __gate_position_info_update(self):
         self.gate1Ypos += self.gate_speed
         self.gate2Ypos += self.gate_speed
+        self.gate3Ypos += self.gate_speed
         if self.gate1Ypos > SCREEN_HEIGHT - GATE_HEIGHT: # 게이트가 화면 밖으로 빠져나가지 않게 조정
             self.__new_gate(1)
         if self.gate2Ypos > SCREEN_HEIGHT - GATE_HEIGHT: # 게이트가 화면 밖으로 빠져나가지 않게 조정
             self.__new_gate(2)
+        if self.gate3Ypos > SCREEN_HEIGHT - GATE_HEIGHT: # 게이트가 화면 밖으로 빠져나가지 않게 조정
+            self.__new_gate(3)
     
     def __check_collision(self):
         catRect = cat.rect # 캐릭터 판정 위치
@@ -223,6 +229,10 @@ class Game:
         gateRect2 = self.gate2.get_rect() # 게이트 판정 위치
         gateRect2.left = self.gate2Xpos
         gateRect2.top = self.gate2Ypos
+
+        gateRect3 = self.gate3.get_rect() # 게이트 판정 위치
+        gateRect3.left = self.gate3Xpos
+        gateRect3.top = self.gate3Ypos
 
         if catRect.colliderect(gateRect1): # 충돌이 일어났다면
         
@@ -249,6 +259,17 @@ class Game:
                 self.gate_string = self.gate_string + " " + self.gate2_kind
                 self.__update_state(2) # update bloch sphere picture
                 self.__new_gate(2)
+        
+        if catRect.colliderect(gateRect3): # 충돌이 일어났다면
+        
+            if self.gate3_kind == "M":
+                self.is_gaming = False
+                self.__new_gate(3)
+            
+            else:                    
+                self.gate_string = self.gate_string + " " + self.gate3_kind
+                self.__update_state(3) # update bloch sphere picture
+                self.__new_gate(3)
 
 
     def __new_gate(self, gate_num):
@@ -258,14 +279,19 @@ class Game:
             self.gate1_kind = random.choice(gate_weight)
             self.gate1 = all_gates[self.gate1_kind]
             self.gate1Xpos = random.randrange(0, int(SCREEN_WIDTH*0.7933)-GATE_WIDTH) # (새로운 게이트 위치 설정)
-            self.gate1Ypos = 100
+            self.gate1Ypos = 100 - random.random() * 50
 
         if gate_num == 2:
-            # self.gate2_kind, self.gate2 = random.choice(list(all_gates.items()))
             self.gate2_kind = random.choice(gate_weight)
             self.gate2 = all_gates[self.gate2_kind]
             self.gate2Xpos = random.randrange(0, int(SCREEN_WIDTH*0.7933)-GATE_WIDTH)
-            self.gate2Ypos = 100
+            self.gate2Ypos = 100 - random.random() * 50
+        
+        if gate_num == 3:
+            self.gate3_kind = random.choice(gate_weight)
+            self.gate3 = all_gates[self.gate3_kind]
+            self.gate3Xpos = random.randrange(0, int(SCREEN_WIDTH*0.7933)-GATE_WIDTH)
+            self.gate3Ypos = 100 - random.random() * 50
         
         # (게이트 점수 업데이트)
         self.score += 1
@@ -310,9 +336,6 @@ class Game:
             if self.gate2_kind == "T+":
                 self.qc.tdg(0)
 
-        # print(self.gate_string)
-        # print(self.qc)
-        # print(self.gate1_kind, self.gate2_kind)
         qc_init = self.qc.copy()
         qc_init.save_statevector()
         statevector = sim.run(qc_init).result().get_statevector()
@@ -327,13 +350,13 @@ class Game:
         plt.cla()
         self.state = pygame.transform.scale(pygame.image.load("./temp/statevector.png"), (STATE_WIDTH, STATE_HEIGHT))
 
-    def __new_target_state(self):
-        self.target_state_kind, self.target_state = random.choice(list(all_target_states.items()))
+    # def __new_target_state(self):
+    #     self.target_state_kind, self.target_state = random.choice(list(all_target_states.items()))
     
     def __graphic_update(self):
-        time_text = self.game_font.render(f"time : {str(int(time.time() - self.start_time))} sec", True, (0,0,0)) #타이머 표시
-        score_text = self.game_font.render(f"score : {str(self.score)}", True, (0,0,0))
-        eat_gate_text = self.game_font.render(f"Gates you got : {str(self.gate_string)}", True, (0,0,0))
+        time_text = self.game_font.render(f"Time : {str(int(time.time() - self.start_time))} sec", True, (0,0,0)) #타이머 표시
+        score_text = self.game_font.render(f"Score : {str(self.score)}", True, (0,0,0))
+        eat_gate_text = self.game_font.render(f"Gates : {str(self.gate_string)}", True, (0,0,0))
 
         self.screen.fill((0,0,255)) # clear all
         self.screen.blit(background_in_game, (0,0))
@@ -341,11 +364,12 @@ class Game:
         moving_sprites.update(0.25)
         self.screen.blit(self.gate1, (self.gate1Xpos , self.gate1Ypos))
         self.screen.blit(self.gate2, (self.gate2Xpos , self.gate2Ypos))
-        self.screen.blit(time_text, (10,10))
-        self.screen.blit(score_text, (10,30))
-        self.screen.blit(eat_gate_text, (10, 50))
+        self.screen.blit(self.gate3, (self.gate3Xpos , self.gate3Ypos))
+        self.screen.blit(time_text, (10, 10))
+        self.screen.blit(score_text, (10, 40))
+        self.screen.blit(eat_gate_text, (10, 70))
         self.screen.blit(self.state, (800,0))
-        self.screen.blit(self.target_state, (800,300))
+        # self.screen.blit(self.target_state, (800,300))
         
         pygame.display.update()
 
@@ -384,6 +408,7 @@ class Game:
             self.screen.blit(alive, (0,0))
             pygame.display.update()
             time.sleep(1)
+            self.score += 100 # additional score for measurement
             self.__prepare_game(dead=False)
         else:
             self.screen.blit(dead, (0,0))
@@ -395,8 +420,6 @@ class Game:
 
 
         
-        
-
 
 def main():
     g = Game()
