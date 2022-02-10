@@ -65,27 +65,27 @@ all_gates = {
     }
 
 gate_weight = "X Y Z H S S+ T T+ M M M M M".split()
-
-# all_target_states = {
-#     "0": load_image_from("resource/target_state/0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "1": load_image_from("resource/target_state/1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x-0": load_image_from("resource/target_state/x-0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x-1": load_image_from("resource/target_state/x-1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x-2": load_image_from("resource/target_state/x-2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x-3": load_image_from("resource/target_state/x-3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x+0": load_image_from("resource/target_state/x+0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x+1": load_image_from("resource/target_state/x+1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x+2": load_image_from("resource/target_state/x+2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x+3": load_image_from("resource/target_state/x+3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x0": load_image_from("resource/target_state/x0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x1": load_image_from("resource/target_state/x1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x2": load_image_from("resource/target_state/x2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x3": load_image_from("resource/target_state/x3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x4": load_image_from("resource/target_state/x4.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x5": load_image_from("resource/target_state/x5.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x6": load_image_from("resource/target_state/x6.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-#     "x7": load_image_from("resource/target_state/x7.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
-# }
+# 
+all_target_states = {
+    "0": load_image_from("resource/target_state/0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "1": load_image_from("resource/target_state/1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x-0": load_image_from("resource/target_state/x-0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x-1": load_image_from("resource/target_state/x-1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x-2": load_image_from("resource/target_state/x-2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x-3": load_image_from("resource/target_state/x-3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x+0": load_image_from("resource/target_state/x+0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x+1": load_image_from("resource/target_state/x+1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x+2": load_image_from("resource/target_state/x+2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x+3": load_image_from("resource/target_state/x+3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x0": load_image_from("resource/target_state/x0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x1": load_image_from("resource/target_state/x1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x2": load_image_from("resource/target_state/x2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x3": load_image_from("resource/target_state/x3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x4": load_image_from("resource/target_state/x4.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x5": load_image_from("resource/target_state/x5.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x6": load_image_from("resource/target_state/x6.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x7": load_image_from("resource/target_state/x7.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+}
 
 sim = Aer.get_backend("aer_simulator")
 
@@ -151,7 +151,7 @@ class Game:
         self.qc.h(0)
         self.__update_state()
         
-        # self.__new_target_state() # self.target_state is determined here
+        self.__new_target_state() # self.target_state is determined here
 
 
     def play_game(self):
@@ -245,9 +245,11 @@ class Game:
                 self.__update_state(1) # update bloch sphere picture
                 self.__new_gate(1)
                 
-                # <- if self.state_kind == self.target_state_kind
-                # score up
-                # make new_target_state
+                """
+                if self.state_kind == self.target_state_kind: <- not implemented yet
+                    self.score += 100
+                    self.__new_target_state()
+                """
 
         if catRect.colliderect(gateRect2): # 충돌이 일어났다면
         
@@ -350,8 +352,8 @@ class Game:
         plt.cla()
         self.state = pygame.transform.scale(pygame.image.load("./temp/statevector.png"), (STATE_WIDTH, STATE_HEIGHT))
 
-    # def __new_target_state(self):
-    #     self.target_state_kind, self.target_state = random.choice(list(all_target_states.items()))
+    def __new_target_state(self):
+        self.target_state_kind, self.target_state = random.choice(list(all_target_states.items()))
     
     def __graphic_update(self):
         time_text = self.game_font.render(f"Time : {str(int(time.time() - self.start_time))} sec", True, (0,0,0)) #타이머 표시
@@ -369,7 +371,7 @@ class Game:
         self.screen.blit(score_text, (10, 40))
         self.screen.blit(eat_gate_text, (10, 70))
         self.screen.blit(self.state, (800,0))
-        # self.screen.blit(self.target_state, (800,300))
+        self.screen.blit(self.target_state, (800,200)) # update target state picture
         
         pygame.display.update()
 
