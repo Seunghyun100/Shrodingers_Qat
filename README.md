@@ -23,6 +23,8 @@ Computer app using Python
 - qiskit
 - qiskit.visualization
 
+# Demo play
+https://youtu.be/QoJEGBVFUNI
 
 # Future work (not implemented yet)
 - [ ] target state misson
