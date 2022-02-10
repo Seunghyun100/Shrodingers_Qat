@@ -1,7 +1,7 @@
 import pygame
 
 class Cat(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y, CAT_WIDTH, CAT_HEIGHT):
+    def __init__(self, CAT_WIDTH, CAT_HEIGHT):
         super().__init__()
         self.attack_animation = False
         self.key_left = True
@@ -12,9 +12,9 @@ class Cat(pygame.sprite.Sprite):
         self.sprites.append(pygame.transform.scale(pygame.image.load("resource/cat_layers/cat_stand_right.png"), (CAT_WIDTH, CAT_HEIGHT)))
         self.current_sprite = 0
         self.image = self.sprites[self.current_sprite]
-
+        
         self.rect = self.image.get_rect()
-        self.rect.topleft = [pos_x, pos_y]
+        # self.rect.topleft = [pos_x, pos_y]
 
     def attack(self, key_left):
         self.attack_animation = True

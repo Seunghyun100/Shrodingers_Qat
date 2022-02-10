@@ -18,8 +18,11 @@ GATE_HEIGHT = 120
 CAT_WIDTH = 120
 CAT_HEIGHT = 120
 
-STATE_WIDTH = 240
-STATE_HEIGHT = 240
+STATE_WIDTH = 190
+STATE_HEIGHT = 190
+
+TARGET_STATE_WIDTH = 200
+TARGET_STATE_HEIGHT = 220
 
 FRAMES_PER_SECOND = 60 # update display upto FRAMES_PER_SECOND times per a second
 
@@ -34,18 +37,18 @@ background_in_game = pygame.transform.scale(
 background_die = pygame.transform.scale(
     pygame.image.load("resource/background_images/Died_background.png"), (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-def create_gate(path):
-    return pygame.transform.scale(pygame.image.load(path), (GATE_WIDTH, GATE_HEIGHT))
+def load_image_from(path, width, height):
+    return pygame.transform.scale(pygame.image.load(path), (width, height))
 
-X = create_gate("resource/gate/xgate.png")
-Y = create_gate("resource/gate/ygate.png")
-Z = create_gate("resource/gate/zgate.png")
-H = create_gate("resource/gate/hgate.png")
-S = create_gate("resource/gate/sgate.png")
-S_dagger = create_gate("resource/gate/sdgate.png")
-T = create_gate("resource/gate/tgate.png")
-T_dagger = create_gate("resource/gate/tdgate.png")
-M = create_gate("resource/gate/measure.png")
+X = load_image_from("resource/gate/xgate.png", GATE_WIDTH, GATE_HEIGHT)
+Y = load_image_from("resource/gate/ygate.png", GATE_WIDTH, GATE_HEIGHT)
+Z = load_image_from("resource/gate/zgate.png", GATE_WIDTH, GATE_HEIGHT)
+H = load_image_from("resource/gate/hgate.png", GATE_WIDTH, GATE_HEIGHT)
+S = load_image_from("resource/gate/sgate.png", GATE_WIDTH, GATE_HEIGHT)
+S_dagger = load_image_from("resource/gate/sdgate.png", GATE_WIDTH, GATE_HEIGHT)
+T = load_image_from("resource/gate/tgate.png", GATE_WIDTH, GATE_HEIGHT)
+T_dagger = load_image_from("resource/gate/tdgate.png", GATE_WIDTH, GATE_HEIGHT)
+M = load_image_from("resource/gate/measure.png", GATE_WIDTH, GATE_HEIGHT)
 
 all_gates = {
     "X": X,
@@ -59,10 +62,31 @@ all_gates = {
     "M": M
     }
 
+all_target_states = {
+    "0": load_image_from("resource/target_state/0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "1": load_image_from("resource/target_state/1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x-0": load_image_from("resource/target_state/x-0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x-1": load_image_from("resource/target_state/x-1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x-2": load_image_from("resource/target_state/x-2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x-3": load_image_from("resource/target_state/x-3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x+0": load_image_from("resource/target_state/x+0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x+1": load_image_from("resource/target_state/x+1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x+2": load_image_from("resource/target_state/x+2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x+3": load_image_from("resource/target_state/x+3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x0": load_image_from("resource/target_state/x0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x1": load_image_from("resource/target_state/x1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x2": load_image_from("resource/target_state/x2.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x3": load_image_from("resource/target_state/x3.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x4": load_image_from("resource/target_state/x4.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x5": load_image_from("resource/target_state/x5.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x6": load_image_from("resource/target_state/x6.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+    "x7": load_image_from("resource/target_state/x7.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
+}
+
 sim = Aer.get_backend("aer_simulator")
 
 moving_sprites = pygame.sprite.Group()
-cat = Cat(0, 0, CAT_WIDTH, CAT_HEIGHT)
+cat = Cat(CAT_WIDTH, CAT_HEIGHT)
 moving_sprites.add(cat)
 
 class Game:
@@ -74,6 +98,7 @@ class Game:
         self.is_running = True
         self.is_alive = True
         self.game_font = pygame.font.Font(None,40)
+        self.key_left = False
     
     def show_title(self):
         self.screen.blit(background_title, (0,0))
@@ -117,6 +142,8 @@ class Game:
         self.qc = QuantumCircuit(1)
         self.qc.h(0)
         self.__new_state()
+        
+        self.__new_target_state() # self.target_state is determined here
 
 
     def play_game(self):
@@ -137,21 +164,27 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
                         self.catDirection = -1
-                        cat.attack(True)
+                        self.key_left = True
+                        cat.attack(self.key_left)
+                        
                     if event.key == pygame.K_RIGHT:
                         self.catDirection = +1
-                        cat.attack(False)
+                        self.key_left = False
+                        cat.attack(self.key_left)
 
                 if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT: # 왼쪽 화살표 키
+                    if event.key == pygame.K_LEFT and self.key_left: # 왼쪽 화살표 키
+                        self.catDirection = 0
+                        cat.keyup()
+                    if event.key == pygame.K_RIGHT and not self.key_left:
                         self.catDirection = 0
                         cat.keyup()
             
             # cat's info update
-            self.__cat_info_update()
+            self.__cat_position_info_update()
             
             # gate's info update
-            self.__gate_info_update()
+            self.__gate_position_info_update()
 
             # check collision
             self.__check_collision()
@@ -159,21 +192,20 @@ class Game:
             # total graphic update
             self.__graphic_update()
     
-    def __cat_info_update(self):
+    def __cat_position_info_update(self):
         self.catXpos += self.catDirection * self.clock.tick(FRAMES_PER_SECOND) * self.catSpeed
         if self.catXpos < 0: # 캐릭터가 화면 밖으로 빠져나가지 않게 조정
             self.catXpos = 0
         elif self.catXpos > int(SCREEN_WIDTH*(0.7933)) - CAT_WIDTH:
             self.catXpos = int(SCREEN_WIDTH*(0.7933)) - CAT_WIDTH  
 
-    def __gate_info_update(self):
+    def __gate_position_info_update(self):
         self.gate1Ypos += self.gate_speed
         self.gate2Ypos += self.gate_speed
         if self.gate1Ypos > SCREEN_HEIGHT - GATE_HEIGHT: # 게이트가 화면 밖으로 빠져나가지 않게 조정
             self.__new_gate(1)
         if self.gate2Ypos > SCREEN_HEIGHT - GATE_HEIGHT: # 게이트가 화면 밖으로 빠져나가지 않게 조정
             self.__new_gate(2)
-        
     
     def __check_collision(self):
         catRect = cat.rect # 캐릭터 판정 위치
@@ -197,7 +229,7 @@ class Game:
             else:                    
                 self.gate_string = self.gate_string + " " + self.gate1_kind
                 self.__new_gate(1)
-                self.__new_state() # update bloch sphere picture
+                self.__new_state(1) # update bloch sphere picture
 
         if catRect.colliderect(gateRect2): # 충돌이 일어났다면
         
@@ -208,7 +240,7 @@ class Game:
             else:                    
                 self.gate_string = self.gate_string + " " + self.gate2_kind
                 self.__new_gate(2)
-                self.__new_state() # update bloch sphere picture
+                self.__new_state(2) # update bloch sphere picture
 
     def __new_gate(self, gate_num):
         
@@ -227,9 +259,45 @@ class Game:
         if self.gate_speed < self.gate_speed_limit:
             self.gate_speed += self.gate_dspeed
     
-    def __new_state(self):
+    def __new_state(self, gate_num=None):
 
-        # <- gate update on self.qc
+        # <- gate update on self.qc by self.gate_string
+
+        if gate_num == 1:
+            if self.gate1_kind == "X":
+                self.qc.x(0)
+            if self.gate1_kind == "Y":
+                self.qc.y(0)
+            if self.gate1_kind == "Z":
+                self.qc.z(0)
+            if self.gate1_kind == "H":
+                self.qc.h(0)
+            if self.gate1_kind == "S":
+                self.qc.s(0)
+            if self.gate1_kind == "T":
+                self.qc.t(0)
+            if self.gate1_kind == "S+":
+                self.qc.sdg(0)
+            if self.gate1_kind == "T+":
+                self.qc.tdg(0)
+        
+        if gate_num == 2:
+            if self.gate2_kind == "X":
+                self.qc.x(0)
+            if self.gate2_kind == "Y":
+                self.qc.y(0)
+            if self.gate2_kind == "Z":
+                self.qc.z(0)
+            if self.gate2_kind == "H":
+                self.qc.h(0)
+            if self.gate2_kind == "S":
+                self.qc.s(0)
+            if self.gate2_kind == "T":
+                self.qc.t(0)
+            if self.gate2_kind == "S+":
+                self.qc.sdg(0)
+            if self.gate2_kind == "T+":
+                self.qc.tdg(0)
 
         if not os.path.exists("./temp"):
             os.mkdir("./temp")
@@ -247,6 +315,8 @@ class Game:
             self.state = pygame.transform.scale(pygame.image.load(f"./temp/{statevector}.png"), (STATE_WIDTH, STATE_HEIGHT))
             # os.remove(f"./temp/{statevector}.png")
 
+    def __new_target_state(self):
+        _, self.target_state = random.choice(list(all_target_states.items()))
     
     def __graphic_update(self):
         time_text = self.game_font.render(f"time : {str(int(time.time() - self.start_time))} sec", True, (0,0,0)) #타이머 표시
@@ -255,7 +325,6 @@ class Game:
 
         self.screen.fill((0,0,255)) # clear all
         self.screen.blit(background_in_game, (0,0))
-        # self.screen.blit(cat, (self.catXpos , self.catYpos))
         moving_sprites.draw(self.screen)
         moving_sprites.update(0.25)
         self.screen.blit(self.gate1, (self.gate1Xpos , self.gate1Ypos))
@@ -263,7 +332,8 @@ class Game:
         self.screen.blit(time_text, (10,10))
         self.screen.blit(score_text, (10,30))
         self.screen.blit(eat_gate_text, (10, 50))
-        self.screen.blit(self.state, (750,0))
+        self.screen.blit(self.state, (800,0))
+        self.screen.blit(self.target_state, (800,300))
         
         pygame.display.update()
 
