@@ -7,14 +7,16 @@ from qiskit.visualization import plot_bloch_multivector
 import os
 import matplotlib.pyplot as plt
 
+from animation.cat import Cat
+
 SCREEN_WIDTH = 1000 # 가로크기
 SCREEN_HEIGHT = 800 # 세로크기
 
-CAT_WIDTH = 150
-CAT_HEIGHT = 150
-
 GATE_WIDTH = 150
 GATE_HEIGHT = 150
+
+CAT_WIDTH = 150
+CAT_HEIGHT = 150
 
 STATE_WIDTH = 250
 STATE_HEIGHT = 250
@@ -59,47 +61,9 @@ gates = {
 
 sim = Aer.get_backend("aer_simulator")
 
-class Cat(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y):
-        super().__init__()
-        self.attack_animation = False
-        self.key_left = True
-        self.sprites = []
-        self.sprites.append(pygame.transform.scale(pygame.image.load("resource/cat_layers/cat_walk_left.png"), (CAT_WIDTH, CAT_HEIGHT)))
-        self.sprites.append(pygame.transform.scale(pygame.image.load("resource/cat_layers/cat_stand_left.png"), (CAT_WIDTH, CAT_HEIGHT)))
-        self.sprites.append(pygame.transform.scale(pygame.image.load("resource/cat_layers/cat_walk_right.png"), (CAT_WIDTH, CAT_HEIGHT)))
-        self.sprites.append(pygame.transform.scale(pygame.image.load("resource/cat_layers/cat_stand_right.png"), (CAT_WIDTH, CAT_HEIGHT)))
-        self.current_sprite = 0
-        self.image = self.sprites[self.current_sprite]
-
-        self.rect = self.image.get_rect()
-        self.rect.topleft = [pos_x, pos_y]
-
-    def attack(self, key_left):
-        self.attack_animation = True
-        self.key_left = key_left
-        if key_left == False:
-            self.current_sprite = 2
-
-    def keyup(self):
-        self.attack_animation = False
-
-    def update(self,speed):
-        if self.attack_animation == True:
-            if self.key_left == True:
-                self.current_sprite += speed
-                if int(self.current_sprite) >= len(self.sprites)/2:
-                    self.current_sprite = 0
-
-            if self.key_left == False:
-                self.current_sprite += speed
-                if int(self.current_sprite) >= len(self.sprites):
-                    self.current_sprite = 2
-
-        self.image = self.sprites[int(self.current_sprite)]
 
 moving_sprites = pygame.sprite.Group()
-cat = Cat(100,100)
+cat = Cat(0, 0, CAT_WIDTH, CAT_HEIGHT)
 moving_sprites.add(cat)
 
 class Game:
