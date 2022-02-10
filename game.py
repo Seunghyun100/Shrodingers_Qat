@@ -64,6 +64,8 @@ all_gates = {
     "M": M
     }
 
+gate_weight = "X Y Z H S S+ T T+ M M M M M".split()
+
 all_target_states = {
     "0": load_image_from("resource/target_state/0.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
     "1": load_image_from("resource/target_state/1.png", TARGET_STATE_WIDTH, TARGET_STATE_HEIGHT),
@@ -252,12 +254,16 @@ class Game:
     def __new_gate(self, gate_num):
         
         if gate_num == 1:
-            self.gate1_kind, self.gate1 = random.choice(list(all_gates.items())) # (다음번 떨어질 게이트 정하기)
+            # self.gate1_kind, self.gate1 = random.choice(list(all_gates.items())) # (다음번 떨어질 게이트 정하기)
+            self.gate1_kind = random.choice(gate_weight)
+            self.gate1 = all_gates[self.gate1_kind]
             self.gate1Xpos = random.randrange(0, int(SCREEN_WIDTH*0.7933)-GATE_WIDTH) # (새로운 게이트 위치 설정)
             self.gate1Ypos = 100
 
         if gate_num == 2:
-            self.gate2_kind, self.gate2 = random.choice(list(all_gates.items()))
+            # self.gate2_kind, self.gate2 = random.choice(list(all_gates.items()))
+            self.gate2_kind = random.choice(gate_weight)
+            self.gate2 = all_gates[self.gate2_kind]
             self.gate2Xpos = random.randrange(0, int(SCREEN_WIDTH*0.7933)-GATE_WIDTH)
             self.gate2Ypos = 100
         
@@ -373,8 +379,8 @@ class Game:
             pygame.display.update()
             self.clock.tick(FRAMES_PER_SECOND)
         
-        judge = random.random()
-        if self.live_prob >= judge:
+        dead_or_alive = random.random()
+        if self.live_prob >= dead_or_alive:
             self.screen.blit(alive, (0,0))
             pygame.display.update()
             time.sleep(1)
