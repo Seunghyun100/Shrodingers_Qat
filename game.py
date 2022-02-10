@@ -1,4 +1,3 @@
-from http.client import GATEWAY_TIMEOUT
 import pygame
 import random
 import time
@@ -6,6 +5,7 @@ from qiskit import QuantumCircuit, Aer
 from qiskit.visualization import plot_bloch_multivector
 import os
 import matplotlib.pyplot as plt
+import numpy as np
 
 from animation.cat import Cat
 
@@ -308,7 +308,19 @@ class Game:
         qc_init.save_statevector()
         statevector = sim.run(qc_init).result().get_statevector()
 
-        # <- if statevector = []
+        # coef0, coef1 = statevector.data
+        # theta = np.round(np.arccos(coef0),3)
+        # phi = np.round(np.angle(coef1),3)
+
+        # if np.absolute(coef0) == np.absolute(coef1):
+        #     print("plate:", phi/(np.pi/4))
+        
+        # elif np.absolute(coef0) > np.absolute(coef1):
+        #     print("+:", phi/(np.pi/4))
+        
+        # else:
+        #     print("-:", phi/(np.pi/4))
+
         # self.state_kind
 
         try:
